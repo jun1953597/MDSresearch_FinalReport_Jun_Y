@@ -1,4 +1,7 @@
 # MDSresearch_FinalReport_Jun_Y
+
+The core objective of this study is to simulate the microfossil sampling process through programming in R.
+
 The repository contains two parts: 
 
 1.Final Report folder
@@ -15,4 +18,4 @@ Plot code：SimPlot.R, SimExample.R
 
 Output code：bestResult.R
 
-Relevant data .csv file
+Some relevant data .csv file
