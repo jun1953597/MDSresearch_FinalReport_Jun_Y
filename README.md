@@ -10,6 +10,8 @@ The Final Report's R markdown file.
 
 And the relevant pictures and Bib files used for knitting.
 
+A Template of Final Report
+
 2.Simulation folder
 
 Simulation Code：SimulationCODE.R, Distance.R
