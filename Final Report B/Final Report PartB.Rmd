@@ -1,0 +1,1233 @@
+---
+title: "Simulating Microfossils Sampling"
+subtitle: "Part B"
+author: "Jun Yin"
+date: "2026-08-02"
+output:
+  pdf_document:
+      number_sections: true
+bibliography: refs.bib
+geometry: "top=20mm, left=20mm, right=20mm, bottom=20mm"
+fontsize: 12pt
+---
+
+\newtheorem{theorem}{Theorem}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Project supervisor: Anthony Mays
+
+# Declaration
+
+In submitting this work I am indicating that I have read the University's Academic Integrity Policy. I declare that all material in this assessment is my own work except where there is clear acknowledgement and reference to the work of others. I give permission for this work to be reproduced and submitted to other academic staff for educational purposes.
+
+# Abstract
+Microfossil concentration is commonly estimated from subsample counts because counting an entire microscope slide is usually impractical. This study used computer simulation to evaluate the statistical performance of the Exotic Marker Technique combined with the Linear Method, with particular attention to estimation accuracy, precision, and data-collection effort. Target microfossils and marker particles were generated in a two-dimensional region using independent homogeneous Poisson point processes, and the simulated spatial patterns were assessed under the assumption of complete spatial randomness. The effects of simulation times, marker threshold, and target-to-marker ratio were then investigated. The results showed that, considering both estimation precision and data-collection effort, the preferred parameter combination consisted of 500 simulations, a marker threshold equal to 1/20 of the total marker abundance, and a target-to-marker ratio of 2. Under this parameter combination, the concentration estimate achieved an accuracy of 99.89% with a total standard error of 7.74%, indicating that our simulations can produce highly accurate and precise concentration estimates.
+
+The model was further extended to multi-type microfossil scenario. Differences in target abundance produced only limited differences in precision, generally below 5%, but rare targets showed rapidly increasing error and a growing risk of non-detection. When the rare target abundance was 1/100 of the marker abundance, its detection probability decreased to 89.4%, and at 1/200 it decreased to 66%. Concentration estimates for independently generated targets also showed strong positive correlations because they shared the same marker. These results demonstrate that the simulation can provide accurate and stable concentration estimates under appropriate parameter settings, but rare-target detection and marker-induced correlations require careful consideration in multi-type microfossil analyses.
+
+\newpage
+
+# Introduction
+Microfossils are the fossils of tiny organisms that need to be observed with a microscope. They are the main research objects of study in micropalaeontology. Microfossils are generally preserved in a variety of sedimentary environments and are important evidence for reconstructing past changes in vegetation, climate, and ecosystems [@DANIAU2019, p.1]. Taking fossil pollen as an example, it is widely present in lakes, wetlands and marine sediments, and is one of the most common and valuable tools for studying global historical environmental and climate change [@CHEVALIER2020, p.1]. Fossil concentration is a common indicator of absolute abundance in past ecosystems [@Mays2025, p.2].
+
+Because the number of microfossils is usually very large, researchers usually cannot count the whole sample completely. Therefore, the concentration estimation usually relies on sampling count and statistical inference. Even so, manual counting of microfossils under a microscope is time-consuming and labor-intensive. We often need to balance the estimation precision with the counting effort. Computer simulations can preset the true concentration and particle distribution and be repeated in large numbers under different conditions, allowing a faster assessment of the accuracy and precision of concentration estimates.
+
+This study uses computer simulations to investigate the statistical performance of the Linear Method in microfossil sampling. The accuracy and precision of concentration estimates, together with data collection effort, are used as the main evaluation metrics. The study examines how changes in parameters such as the simulation times, the marker threshold, and the target-to-marker ratio affect the simulation results. To better represent the complex conditions in real samples, where multiple microfossil types exist simultaneously, the study is extended to a multi-type microfossil scenario. It further examines the effects of of different numerical relationships between targets, the detection of rare targets, and the correlation between the concentration estimates of multiple targets.
+
+# Background
+## Exotic Marker Technique
+The Exotic Marker Technique was first applied to organic microfossils by @Benninghoff1962, in which the exotic marker refers to particles that do not exist in the original sediment. The basic principle is to add a known number of exotic marker grains to the sample that can be distinguished from the fossil pollen. Then the target concentration is estimated according to the counting ratio of fossil pollen to marker grains.
+
+$$
+\frac{\text{Fossil pollen in sample}}
+{\text{Fossil pollen counted}}
+=
+\frac{\text{marker grains in sample}}
+{\text{marker grains counted}}
+$$
+
+This method establishes the basis for quantitative analysis of microfossils, and its key advantage is that we do not need to observe and manually count the whole sample, but infer the overall number of targets by proportion, which greatly reduces the counting time.
+
+@Stockmarr1971 proposed the use of standardized tablets containing known numbers of Lycopodium spores. This method effectively avoids the unevenness problem caused by the liquid suspension system and significantly improves the repeatability and accuracy of the experiment. Lycopodium tablets have since been widely used for concentration analysis of pollen, spores, and other organic microfossils.
+
+In a recent study, @KITABA2017 tried to use artificial marker particles with properties closer to the target microfossils. They proposed the use of black ceramic spheres as marker grains. It has relatively stable physical and chemical properties, and its density is very close to that of fossil pollen grains. Compared to Lycopodium spores, the behavior of ceramic spheres was closer to the pollen grains. 
+
+## Linear Method
+The Linear Method is a traditional microscopic counting method. In a recent study, @Mays2025 compared the Linear Method with the new sampling Method Field-of-View Subsampling Method (FOVS). The paper defines a clear process description of the linear method. The observer continuously examined the microscope field along a fixed direction and simultaneously recorded target microfossils and labeled particles until a preset counting goal was reached. The schematic diagram of the linear method is shown in Figure \ref{f:LM}^[The figure was made in PowerPoint, see file Linear Method.pptx.].
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/LM.png}
+\caption{Schematic diagram of linear method}
+\label{f:LM}
+\end{figure}
+
+The estimation results of the linear method depend on the observed target-to-marker counting ratio. Based on the counted target and counted marker, the absolute abundance of target particles can be estimated. They then used absolute abundance, precision and data collection effort as the main evaluation metrics. The results show that the linear method is more efficient mainly when the particle density is low, or when the number of targets is close to the number of markers.
+
+## Homogeneous Poisson Point Process and CSR
+A homogeneous Poisson point process can be used to represent the random distribution of points within a two-dimensional region. Its intensity parameter, $\lambda$, represents the expected number of points per unit area. For a region $A$ with area $|A|$, the number of points within the region follows
+
+$$
+N(A) \sim \operatorname{Poisson}(\lambda |A|),
+$$
+
+with both its mean and variance equal to $\lambda |A|$,
+
+$$
+\mathbb{E}[N(A)] = \operatorname{Var}[N(A)] = \lambda |A|.
+$$
+
+A homogeneous Poisson point process corresponds to Complete Spatial Randomness (CSR). Under the CSR assumption, the intensity of the point process remains constant throughout the observation region, and the locations of individual points are independent of one another, with no systematic clustering or inhibition. This assumption represents the ideal condition in which particles are thoroughly mixed within the sample.
+
+### CSR Testing
+@Diggle2013 [p. 17–26] provides several methods for CSR Testing. In this study, all distances are calculated using Euclidean distance. For two points, $i$ and $j$, with coordinates $(x_i, y_i)$ and $(x_j, y_j)$, respectively, the distance between them is defined as: $$d_{ij}=\sqrt{(x_i-x_j)^2+(y_i-y_j)^2}.$$
+
+**Inter-event Distance [@Diggle2013, p.18-23]**
+
+The inter-event distance refers to the distance between any two events. And it can be used to describe the overall spatial separation among points. For a simulation containing $n$ points, the total number of distinct pairwise distances is: 
+$$\binom{n}{2}=\frac{n(n-1)}{2}.$$
+
+**Nearest Neighbor Distance [@Diggle2013, p.24-26]**
+
+The nearest-neighbor distance is defined as the minimum distance from a given event to all other events. And it directly reflects the local spatial relationship around each point. For a Homogeneous Poisson Point Process with intensity $\lambda$, the theoretical cumulative distribution function of the nearest-neighbor distance is approximately given by @Diggle2013 [p. 24]:
+
+\begin{equation}
+G(y)=1-\exp(-\lambda \pi y^2)
+\label{eq:NNdis}
+\end{equation}
+
+## Statistics Estimates
+### Concentration
+After obtaining the counts of target microfossils and marker particles using the Exotic Marker Technique and the Linear Method, we can estimate the target concentration. The closer the estimated value is to the true value, the higher the accuracy. The general formula is based from @Benninghoff1962:
+
+\begin{equation}
+\hat{c} = \frac{x \times N}{n \times V}
+\label{eq:c}
+\end{equation}
+
+- \(x\): The number of counted target
+
+- \(n\): The number of counted marker
+
+- \(N\): The total number of the markers
+
+- \(V\): The total size (area or volume) of sample, here we can assume it to be unit 1
+
+We can then calculate the standard deviation ($sd$) of the concentration estimates:
+
+\begin{equation}
+\text{Standard deviation} =
+\sqrt{\frac{1}{n-1}\sum_{i=1}^{n}\left(\hat{c}_i-\overline{\hat{c}}\right)^2}
+\label{eq:sd}
+\end{equation}
+
+### Precision
+We also need to assess the precision of the estimated concentration. In general, a smaller total standard error indicates higher precision. Here,$\sigma$ represents the total standard error (in %) of the concentration estimate. The formula is based from @Stockmarr1971:
+
+\begin{equation}
+\sigma = 100 \sqrt{\left(\frac{\sqrt{x}}{x}\right)^2
++ \left(\frac{\sqrt{n}}{n}\right)^2}
+\label{eq:sigma}
+\end{equation}
+
+Theoretically, the standard errors mainly come from fluctuations in the number of counted targets and fluctuations in the number of counted markers. Under the Poisson assumption, the variance of $x$ is equal to its expected value. Therefore, the standard deviation of $x$ can be approximated by $\sqrt{x}$, and its relative standard error is $\sqrt{x}/x$. Similarly, the relative standard error of the marker count $n$ is $\sqrt{n}/n$.
+
+The formula can therefore be simplified to:
+$$
+\sigma = 100 \sqrt{\frac{1}{x}+\frac{1}{n}}.
+$$
+We can also get the coefficient of variation according to the Equation \ref{eq:cv}:
+
+\begin{equation}
+\mathrm{CV}(\hat{c}) = \frac{sd(\hat{c})}{\bar{c}} \times 100\%
+\label{eq:cv}
+\end{equation}
+
+The $CV$ reflects the actual dispersion of the concentration estimates obtained from repeated simulations, whereas $\sigma$ is the theoretical error calculated from the counting numbers. The total standard error should therefore approximate the coefficient of variation of the estimated concentrations. By comparing these two measures, we can assess whether our simulations are consistent with the theoretical error.
+
+### Correlaton
+@Maher1981 [p. 153] noted that the exotic marker technique may generate a positive correlation between the estimated concentrations of separate taxa. In the multi-type microfossil scenario, we also examine the correlation between the estimated concentrations of different targets. The linear relationship between two variables can be measured using the Pearson correlation coefficient:
+
+\begin{equation}
+r = \operatorname{cor}(\hat{c}_1, \hat{c}_2)
+\label{eq:cor}
+\end{equation}
+
+Its value ranges from $-1$ to $1$. A positive value indicates that the two variables tend to change in the same direction, whereas a negative value indicates that they tend to change in opposite directions. A value close to zero indicates no clear linear relationship.
+
+# Methods
+## Algorithms
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Example1.png}
+\caption{Schematic diagram of simulation in two target scenarios}
+\label{f:Example1}
+\end{figure}
+
+The core objective of this study is to simulate the microfossil sampling process through programming in R. We set the random seed to 42 to ensure that the simulation results are reproducible. A complete simulation example is shown in Figure \ref{f:Example1}^[See 'p_demo' in Appendix B.4. This diagram was generated by lines 1-48 of the file SimExample.R.]. The simulation program is provided in lines 1--209 of the SimulationCODE.R file in Appendix B.1. And the variable names in the simulation code are visible in Appendix A.1.
+
+**Model algorithm**
+
+> - Step 1: Define a two-dimensional space of size \(1 \times 1\) as the simulation plane for microfossil distribution. (see lines 1--10 of `SimulationCODE.R`)
+>   + Treat this region as the observation space on a microscope slide.
+
+> - Step 2: Set the simulation parameters, including $\lambda_{target}$ and $\lambda_{marker}$, $marker\_goal$ and $nsim$. (see lines 86--92 `SimulationCODE.R`)
+
+> - Step 3: Use two independent Homogeneous Poisson Point Processes to generate the target and marker points separately within the simulation plane. (see lines 11--34 of `SimulationCODE.R`)
+>   + Assume that the two types of points are independent of each other and uniformly randomly distributed throughout the entire two-dimensional region.
+>   + Assign spatial coordinates \((x,y)\) to each point in the plane and assign the corresponding label according to its point type.
+
+> - Step 4: Define the initial rectangular counting window and count the numbers of target and marker points within the current counting window. (see lines 35--41 of `SimulationCODE.R`)
+>   + Set $\texttt{left\_x}=0.10$ and $\texttt{initial\_width}=0.10$. Therefore, the initial right boundary of the window is 0.20.
+>   + Set the vertical range of the window to \(0.45\leq y\leq0.55\). Therefore, the height of the window is 0.10.
+
+> - Step 5: Compare the cumulative number of markers within the window with the predefined marker threshold and perform the linear counting process. (see lines 42--83 of `SimulationCODE.R`)
+>   + If the number of markers is less than the predefined threshold, move the right boundary of the counting window to the right by $\texttt{step\_width}=0.002$.
+>   + After expanding the window, recount the numbers of targets and markers within the window.
+>   + Repeat the above process until the cumulative number of markers reaches the predefined marker threshold.
+>   + When the stopping condition is satisfied, record the final number of counted targets and markers. 
+
+> - Step 6: Repeat the complete spatial-point generation and linear counting process according to the predefined simulation times. (see lines 42--83 of `SimulationCODE.R`)
+>   + Regenerate the spatial locations of the target and marker points in each simulation.
+>   + Record the counted targets \((x)\) and counted markers \((n)\) obtained from each simulation.
+
+> - Step 7: Combine all simulation results to form the final simulated dataset and calculate the required statistics based on the recorded \(x\) and \(n\). (see lines 94--171 of `SimulationCODE.R`)
+>   + The statistics include the estimated concentration, standard deviation, coefficient of variation, and total standard error.
+
+> - Step 8: Record the total running time from the beginning of the simulation until all statistical calculations are completed. (see lines 172--175 of `SimulationCODE.R`)
+>   + Use the running time as a measure of the data-collection effort.
+
+> - Step 9: Combine all simulation parameters, counting results and statistics in a tibble, and save the final results to the $output\_file$. (see lines 176--209 of `SimulationCODE.R`)
+
+## CSR Testing
+
+To assess whether the simulated two-dimensional point patterns are consistent with CSR, two distance-based statistics are used in this study: inter-event distance and nearest neighbor distance. 
+
+### Inter-event Distance
+
+In this study, the inter-event distances obtained from all simulations were combined and used to draw frequency histograms.
+
+### Nearest Neighbor Distance
+
+By differentiating Equation \ref{eq:NNdis}, the corresponding theoretical probability density function is obtained:
+
+$$
+g(y)=2\pi\lambda y \exp(-\lambda \pi y^2)
+$$
+
+In this study, all the nearest neighbor distances obtained through simulation were combined, and their empirical density histograms were compared with the theoretical density function $g(y)$.
+
+## Parameter Optimization
+
+The parameters in the model affect the simulation results, including the simulation times, the marker threshold, and the target-to-marker ratio. We vary these three parameters separately and compare the accuracy, precision, and data collection effort of the results to select appropriate parameter values. When testing one parameter, the other parameters are held constant. For each parameter setting, we record statistics such as the estimated concentration, total standard error, and runtime. Runtime is used as an approximate measure of the data collection effort.
+
+### Simulation Times
+
+In general, a larger number of simulations produces a larger sample size and a more accurate concentration estimate. However, increasing simulation times also results in a longer runtime and a substantial increase in data collection effort. Therefore, we aim to determine the number of simulations required to achieve a given level of accuracy.
+
+After each simulation, we record the number of targets, $x_i$, and the number of markers, $n_i$, within the counting window. We then calculate the cumulative mean target count and marker count over the first $k$ simulations:
+
+$$
+\bar{x}_k = \frac{\sum_{i=1}^{k} x_i}{k},
+\qquad
+\bar{n}_k = \frac{\sum_{i=1}^{k} n_i}{k}.
+$$
+
+Then we substitute $\bar{x}_k$ and $\bar{n}_k$ into Equation 1 to calculate the cumulative concentration estimate $\bar{c}_k$ for the first $k$ simulations. Here, $\lambda_{\mathrm{marker}}$ represents the marker intensity in simulation space.
+
+$$
+\bar{c}_k =
+\frac{\bar{x}_k}{\bar{n}_k}
+\lambda_{\mathrm{marker}}.
+$$
+
+We plot the cumulative concentration estimate against simulation times and compare it with the theoretical true concentration. By examining the magnitude of the fluctuations and the and the bias from the true value, we determine when the simulation results become stable and select the simulation times to be used in the subsequent analyses.
+
+### Marker Threshold
+
+The marker threshold determines when the counting window stops moving. In each simulation, if the number of markers within the window has not yet reached the specified threshold, the window continues to extend to the right. Counting stops when the marker count reaches the threshold or when the window reaches the boundary of the simulation region.
+
+A higher marker threshold allows more targets and markers to be counted. According to the Equation \ref{eq:sigma}, increasing the number of counted objects generally reduces the error and improves the precision of the concentration estimate. However, a higher marker threshold also requires the counting window to cover a larger area and travel a greater distance, thereby increasing the runtime. In actual microscopic counting, this corresponds to examining more fields of view and spending more time on data collection.
+
+To select an appropriate threshold, we tested a series of marker threshold values, with the relevant parameter settings shown in Table \ref{table:marker threshold}. For each simulation setting, we recorded the total standard error and the data collection effort. We then compared the trade-off between precision and workload and selected a threshold that substantially reduced the error without introducing excessive additional work.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+   & Simulation Times & $\lambda_{target}$ & $\lambda_{marker}$ & Marker Threshold \\ \hline
+ 1 & 1000 & 1000 & 1000 & 10 \\ \hline
+ 2 & 1000 & 1000 & 1000 & 25 \\ \hline
+ 3 & 1000 & 1000 & 1000 & 40 \\ \hline
+ 4 & 1000 & 1000 & 1000 & 50 \\ \hline
+ 5 & 1000 & 1000 & 1000 & 60 \\ \hline
+ 6 & 1000 & 1000 & 1000 & 75 \\ \hline
+ 7 & 1000 & 1000 & 1000 & 90 \\ \hline
+ 8 & 1000 & 1000 & 1000 & 100 \\ \hline
+ 9 & 1000 & 1000 & 1000 & 200 \\ \hline
+ 10 & 1000 & 1000 & 1000 & 250 \\ 
+ \hline
+\end{tabular}
+\caption{The parameter setting of marker threshold}
+\label{table:marker threshold}
+\end{table}
+
+### Target-to-Marker Ratio
+
+In real experiments, the number of target microfossils is determined by the sediment sample itself and is generally difficult to control. In contrast, the number of exotic markers added to the sample can be controlled, which is the key of the Exotic Marker Technique.
+
+To investigate the effect of the number of markers added, the target-to-marker ratio was used as a parameter and defined as: 
+$$
+u = \frac{\lambda_{target}}{\lambda_{marker}}
+$$
+We tested a series of different $u$ and recorded the standard deviation ($sd$) of the concentration estimates, the coefficient of variation ($CV$), and the total standard error ($\sigma$). The specific parameter settings are shown in Table \ref{table:target-to-marker ratio}.
+
+At the same time, adding more markers means that more marker particles will be observed under the microscope, which can substantially increase the counting time. Therefore, we also need to evaluate the trade-off between precision and data collection effort.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c|c| } 
+ \hline
+   & Simulation Times & $\lambda_{target}$ & $\lambda_{marker}$ & Marker Threshold & $u$\\ \hline
+ 1 & 1000 & 8000 & 160 & 8 & 50 \\ \hline
+ 2 & 1000 & 8000 & 200 & 10 & 40 \\ \hline
+ 3 & 1000 & 8000 & 400 & 20 & 20 \\ \hline
+ 4 & 1000 & 8000 & 800 & 40 & 10 \\ \hline
+ 5 & 1000 & 8000 & 1600 & 80 & 5 \\ \hline
+ 6 & 1000 & 8000 & 4000 & 200 & 2 \\ \hline
+ 10 & 1000 & 8000 & 8000 & 400 & 1 \\ 
+ \hline
+\end{tabular}
+\caption{The parameter setting of target-to-marker ($u$) ratio}
+\label{table:target-to-marker ratio}
+\end{table}
+
+### Evaluation Metrics
+After the above parameter optimization, we will use the best parameter combination, conduct a complete simulation, and show the evaluation matrix of the simulation results. The evaluation matrix includes the estimated concentration, standard deviation, coefficient of variation, total standard error, accuracy, and running time. The best parameter settings are shown in Table \ref{table:best parameter}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c| } 
+ \hline
+ Simulation Times & $\lambda_{target}$ & $\lambda_{marker}$ & Marker Threshold & $u$\\ \hline
+ 500 & 10000 & 5000 & 250 & 2 \\
+ \hline
+\end{tabular}
+\caption{The best parameter setting combination}
+\label{table:best parameter}
+\end{table}
+
+## Multi-type Microfossil Scenario
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Example2.png}
+\caption{Schematic diagram of simulation in two target scenarios}
+\label{f:Example2}
+\end{figure}
+
+Next, we extend the study to a multi-type microfossil scenario. In a real experiment, sediment samples usually contain multiple types of microfossils simultaneously. To make the simulation more representative of the analysis of multiple microfossil types in real experiments, we introduce a second target. The two target types are denoted as $target1$ and $target2$. A schematic diagram of the simulation in two target scenarios is shown in Figure \ref{f:Example2}^[See 'p_demo2' in Appendix B.4. This diagram was generated by lines 49-94 of the file SimExample.R.].
+
+### Target1-to-Target2 Ratio
+
+In multi-type microfossil samples, the number of different types of microfossils can vary significantly, and their numerical relationships with the marker may also differ. To investigate whether these differences affect the estimation precision of different microfossil types, we designed three scenarios. The description of the different scenarios is in Table \ref{table:different scenarios}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|p{10cm}| } 
+ \hline
+ Scenario & Numerical Relationship & Description \\ \hline
+ 1 & $\lambda_{target1}, \lambda_{target2} > \lambda_{marker}$ 
+ & both targets are greater than markers, meaning that both microfossil types are relatively common \\ \hline
+ 2 & $\lambda_{target1} > \lambda_{marker} > \lambda_{target2}$ 
+ & target1 is greater than markers, whereas target2 is smaller than markers, meaning that one relatively common microfossil type and one relatively rare microfossil type \\ \hline
+ 3 & $\lambda_{marker} > \lambda_{target1}, \lambda_{target2}$ 
+ & markers is greater than both targets, meaning that both microfossil types are relatively rare \\ 
+ \hline
+\end{tabular}
+\caption{Three different scenarios in Multi-type microfossil scenario}
+\label{table:different scenarios}
+\end{table}
+
+In each scenario, in order to gradually increase the difference in the number of the two types of microfossils, we further changed the target1-to-target2 ratio, and defined it as:
+
+$$
+u_x = \frac{\lambda_{target1}}{\lambda_{target2}}
+$$
+Then, according to Equation \ref{eq:sigma}, we compared the changes of $\sigma_1$ and $\sigma_2$ in the three scenarios. The specific parameter settings are shown in Table \ref{table:target1-to-target2 ratio}.
+
+$$
+\sigma_1 = 100 \sqrt{\left(\frac{\sqrt{x_1}}{x_1}\right)^2
++ \left(\frac{\sqrt{n}}{n}\right)^2}, 
+\qquad \sigma_2 = 100 \sqrt{\left(\frac{\sqrt{x_2}}{x_2}\right)^2
++ \left(\frac{\sqrt{n}}{n}\right)^2}
+$$
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c|c|c| } 
+ \hline
+   & Simulation Times & $\lambda_{marker}$ & Marker Threshold & $\lambda_{target1}$ & $\lambda_{target2}$ & $u_x$ \\ \hline
+ 1 & 1000 & 1000 & 50 & 8000 & 1000 & 8 \\ \hline
+ 2 & 1000 & 1000 & 50 & 7500 & 1500 & 5 \\ \hline
+ 3 & 1000 & 1000 & 50 & 7200 & 1800 & 4 \\ \hline
+ 4 & 1000 & 1000 & 50 & 6750 & 2250 & 3 \\ \hline
+ 5 & 1000 & 1000 & 50 & 6000 & 3000 & 2 \\ \hline
+ 6 & 1000 & 1000 & 50 & 4500 & 4500 & 1 \\ \hline
+ 7 & 1000 & 1000 & 50 & 3000 & 6000 & 1/2 \\ \hline
+ 8 & 1000 & 1000 & 50 & 2250 & 6750 & 1/3 \\ \hline
+ 9 & 1000 & 1000 & 50 & 1800 & 7200 & 1/4 \\ \hline
+ 10 & 1000 & 1000 & 50 & 1500 & 7500 & 1/5 \\ \hline
+ 11 & 1000 & 1000 & 50 & 1000 & 8000 & 1/8 \\ 
+ \hline
+\end{tabular}
+\caption{The parameter setting of target1-to-target2 ($u_x$) ratio}
+\label{table:target1-to-target2 ratio}
+\end{table}
+
+### Rare Target
+
+When a microfossil type is extremely rare, it is difficult to observe and identify it accurately under a microscope. We aim to determine whether our simulation is still effective under a rare microfossil scenario. When one target is very rare, whether the linear counting method can detect it consistently is an important question.
+
+We set target2 as a rare target and changed the marker-to-target2 ratio, and defined it as:
+$$
+u_r = \frac{\lambda_{marker}}{\lambda_{rare}}
+$$
+
+By comparing the detection probability under different $u_r$, we can determine how few rare targets are relative to markers, and the current counting method starts to show a high risk of missed detection. The specific parameter settings are shown in Table \ref{table:rare}.
+
+The detection probability is defined as:
+$$
+P_{\text{detect}}
+=
+\frac{\text{simulation times with rare target detected}}
+{\text{total simulation times}}
+\times 100\%.
+$$
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c|c| } 
+ \hline
+   & Simulation Times & $\lambda_{marker}$ & $\lambda_{rare}$ & $u_r$ & Marker Threshold \\ \hline
+ 1 & 1000 & 4000 & 4000 & 1 & 200 \\ \hline
+ 2 & 1000 & 4000 & 2000 & 2 & 200 \\ \hline
+ 3 & 1000 & 4000 & 1000 & 4 & 200 \\ \hline
+ 4 & 1000 & 4000 & 500 & 8 & 200 \\ \hline
+ 5 & 1000 & 4000 & 400 & 10 & 200 \\ \hline
+ 6 & 1000 & 4000 & 200 & 20 & 200 \\ \hline
+ 7 & 1000 & 4000 & 160 & 25 & 200 \\ \hline
+ 8 & 1000 & 4000 & 100 & 40 & 200 \\ \hline
+ 9 & 1000 & 4000 & 80 & 50 & 200 \\ \hline
+ 10 & 1000 & 4000 & 50 & 80 & 200 \\ \hline
+ 11 & 1000 & 4000 & 40 & 100 & 200 \\ \hline
+ 12 & 1000 & 4000 & 25 & 160 & 200 \\ \hline
+ 13 & 1000 & 4000 & 20 & 200 & 200 \\ 
+ \hline
+\end{tabular}
+\caption{The parameter setting of marker-to-target2 ($u_r$) ratio}
+\label{table:rare}
+\end{table}
+
+### Correlation
+
+Although target1 and target2 are generated by two independent point processes, both concentration estimates use the same marker count $n$:
+
+$$
+\hat{c}_1 = \frac{x_1N}{n},
+\qquad
+\hat{c}_2 = \frac{x_2N}{n}.
+$$
+
+Therefore, even if $x_1$ and $x_2$ are independent, the shared denominator $n$ may induce a correlation between the two concentration estimates. For example, if the marker count is lower than expected, both $\hat{c}_1$ and $\hat{c}_2$ may be higher than expected. To determine whether such a correlation occurs, we plot a scatterplot of $\hat{c}_1$ against $\hat{c}_2$. The parameter settings of the scatterplot are shown in Table \ref{table:cor_c}. And we calculate the correlation  based on the Equation \ref{eq:cor}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c|c|c|c| } 
+ \hline
+ Simulation Times & $\lambda_{target1}$ & $\lambda_{target2}$ & $u_x$ & $\lambda_{marker}$ & Marker Threshold \\ \hline
+ 1000 & 1000 & 1000 & 1 & 200 & 10 \\ 
+ \hline
+\end{tabular}
+\caption{The parameter settings of the correlation scatterplot}
+\label{table:cor_c}
+\end{table}
+
+We then repeat the calculation of the correlation under different $u_x$ to examine whether the relative abundances of the two targets affect the degree of correlation between their concentration estimates. The specific parameter settings are the same as Table \ref{table:target1-to-target2 ratio}.
+
+# Results
+## CSR Testing
+### Inter-event Distance
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/IE.png}
+\caption{Test plot of the inter-event distance}
+\label{f:IE}
+\end{figure}
+
+Figure \ref{f:IE}^[See 'p_pair_all_hist' in Appendix B.3. This diagram was generated by lines 71-89 of the file distance.R. The function processes can be found in lines 12-25 of the same file.] shows the frequency histogram of the inter-event distances. 
+
+### Nearest Neighbor Distance
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/NN.png}
+\caption{Test plot of the nearest neighbor distance}
+\label{f:NN}
+\end{figure}
+
+Figure \ref{f:NN}^[See 'p_nn_all_hist' in Appendix B.3. This diagram was generated by lines 48-70 of the file distance.R. The function processes can be found in lines 26-47 of the same file.] shows the density histogram of the nearest neighbor distances, with the theoretical probability density function g(r) superimposed. 
+
+## Parameter Optimization
+### Simulation Times
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Cumc.png}
+\caption{The variation of the cumulative estimated concentration with simulation times}
+\label{f:Cumc}
+\end{figure}
+
+Figure \ref{f:Cumc}^[See 'cumc_plot' in Appendix B.5. This diagram was generated by lines 16–33 of the file SimPlot.R] shows the convergence of the cumulative concentration estimate as the simulation times increase. The red dashed line represents the theoretical true concentration $c_{\text{true}} = 1000$, and the blue curve represents the cumulative concentration estimate obtained from the first $k$ simulations.
+
+### Marker Threshold
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Threshold.png}
+\caption{The variation of $\sigma$ and effort with marker threshold}
+\label{f:Threshold}
+\end{figure}
+
+Figure \ref{f:Threshold}^[See 'threshold_m' in Appendix B.5. This diagram was generated by lines 102–124 of the file SimPlot.R] shows the effects of the marker threshold on the total standard error and data collection effort. The orange curve represents the total standard error ($\sigma$), and the blue curve represents the data collection effort. 
+
+### Target-to-Marker Ratio
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Ratio.png}
+\caption{The variation of the statistics under different $u$ ratios}
+\label{f:Ratio}
+\end{figure}
+
+Figure \ref{f:Ratio}^[See 'ratio' in Appendix B.5. This diagram was generated by lines 34–70 of the file SimPlot.R] shows the changes in the standard deviation, coefficient of variation, and total standard error under different target-to-marker ratios ($u$). The gray bars represent the standard deviation of the concentration estimates ($sd$), the orange curve represents the coefficient of variation ($CV$), and the blue dashed line represents the total standard error ($\sigma$).
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Effort.png}
+\caption{The relationship between data collection effort and precision}
+\label{f:Effort}
+\end{figure}
+
+Figure \ref{f:Effort}^[See 'runtime' in Appendix B.5. This diagram was generated by lines 71–100 of the file SimPlot.R] further shows the relationship between data collection effort and precision as the target-to-marker ($u$) ratio changes. 
+
+### Evaluation Metrics
+Under the best parameter combination, the evaluation metrics of the simulation results are shown in Table \ref{table:best results}^[All of the calculations in this section can be found in Appendix B.1. These calculations were generated on lines 94–171 of the file SimulationCODE.R.].
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c| } 
+ \hline
+ $\lambda_{marker}$ & 10000 \\ \hline
+ Estimated Concentration & 10010.66 \\ \hline
+ Standard Deviation & 798.44 \\ \hline
+ Coefficient of Variation & 7.98 \\ \hline
+ Total Standard Error & 7.74 \\ \hline
+ Accuracy & 99.89\\ \hline
+ Running time & 145.27 \\
+ \hline
+\end{tabular}
+\caption{The evaluation metrics under the best parameter combination}
+\label{table:best results}
+\end{table}
+
+## Multi-type Microfossil Scenario 
+### Target1-to-Target2 Ratio
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Ratio2.png}
+\caption{The variation of $\sigma_1$ and $\sigma_2$ under different $u_x$ ratios}
+\label{f:Ratio2}
+\end{figure}
+
+The total standard errors of target1 and target2 show similar patterns in all three scenarios. Therefore, we present only the results for Scenario 1 ($x_1, x_2 > n$) as representative of the three scenarios. Figure \ref{f:Ratio2}^[See 'cv' in Appendix B.5. This diagram was generated by lines 154–183 of the file SimPlot.R] shows the variation of $\sigma_1$ and $\sigma_2$ under different target1-to-target2 ($u_x$) ratios in Scenario 1. Red represents target1 and blue represents target2.
+
+### Rare Target
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Rare.png}
+\caption{The variation of $\sigma$ for rare target under different $u_r$ ratios}
+\label{f:Rare}
+\end{figure}
+
+Figure \ref{f:Rare}^[See 'df_rare1' in Appendix B.5. This diagram was generated by lines 243–262 of the file SimPlot.R] shows the variation of total standard error ($\sigma$) for rare target under different marker-to-target2 ($u_r$) ratios.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Prob.png}
+\caption{The variation of the detection probability for rare target under different $u_r$ ratios}
+\label{f:Prob}
+\end{figure}
+
+Figure \ref{f:Prob}^[See 'df_rare2' in Appendix B.5. This diagram was generated by lines 263–288 of the file SimPlot.R] further shows the detection probability of the rare target at higher marker-to-target2 ($u_r$) ratios.
+
+### Correlation
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Cor_cc.png}
+\caption{The scatterplot of the concentration estimates for target1 and target2}
+\label{f:Cor_cc}
+\end{figure}
+
+Figure \ref{f:Cor_cc}^[See 'cor_c' in Appendix B.5. This diagram was generated by lines 1–15 of the file SimPlot.R] shows the scatterplot of the concentration estimates for target1 and target2 under one parameter combination.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.8\textwidth]{picture/Corr.png}
+\caption{The variation of correlation coefficient under different $u_x$ ratio}
+\label{f:Corr}
+\end{figure}
+
+Figure \ref{f:Corr}^[See 'corr' in Appendix B.5. This diagram was generated by lines 125–153 of the file SimPlot.R] shows the variation of correlation coefficient under different target1-to-target2 ($u_x$) ratios.
+
+# Discussion
+## CSR Testing
+### Inter-event Distance
+According to Figure \ref{f:IE}, the distribution has a unimodal shape, with intermediate distances occurring most frequently, whereas very short distances and distances close to the diagonal length of the unit square $\sqrt{2}$, occur less frequently. This pattern is consistent with the geometric properties of distances between randomly distributed point pairs within a unit square. Very short distances require two random points to be located very close to each other, whereas distances close to $\sqrt{2}$ require the two points to be located near approximately opposite corners of the square. Consequently, both types of extreme distance have relatively low probabilities of occurrence.
+
+### Nearest Neighbor Distance
+According to Figure \ref{f:NN}, the empirical histogram is in good overall agreement with the theoretical density curve. The nearest neighbor distances are mainly concentrated within a relatively short distance range. As the distance increases, its probability of occurrence gradually decreases. This pattern is consistent with the theoretical characteristics of nearest neighbor distances under a Homogeneous Poisson point process. For a given point intensity, most points have another point nearby, whereas relatively large nearest neighbor distances occur less frequently. 
+
+Based on the results of the inter-event distance and the nearest neighbor distance, the simulated two-dimensional point patterns show a high degree of consistency in distance statistics with the theoretical prediction under CSR. These findings indicate that the simulated two-dimensional point patterns are consistent with the assumption of a Homogeneous Poisson point process.
+
+## Parameter Optimization
+### Simulation Times
+According to Figure \ref{f:Cumc}, when the simulation times are small, the cumulative concentration estimation shows significant fluctuations. As the simulation times increase, the magnitude of fluctuations gradually decreases, indicating a reduction in its variance. After approximately 250 simulations, the estimated value approaches the true concentration and remains close to 1000, with only a small bias. When simulation times exceed 500, the fluctuations become smaller and the curve becomes smoother.
+
+These results indicate that although the concentration estimation in a single simulation may have a large bias, by increasing the number of independent repetitions, the concentration estimation can gradually converge to the true value. Meanwhile, this study suggests that the best parameter selection is 500 simulation times. At this point, both the bias and variance of the concentration estimate are small, and further increasing the simulation times produces no clear improvement.
+
+### Marker Threshold
+According to Figure \ref{f:Threshold}, when the marker threshold is low, the total standard error ($\sigma$) is high. As the marker threshold increases from 10 to 50, $\sigma$ decreases rapidly to about 20%. This is because the counting window covers a larger area, allowing more targets and markers to be counted, which improves precision. When the marker threshold continues to increase from 50 to 100, $\sigma$ still decreases, but the rate of decrease gradually slows, eventually stabilizing at about 15%. In contrast, data collection effort continues to increase as the marker threshold increases, and the rate of increase does not slow down.
+
+When the marker threshold exceeds about 100, both $\sigma$ and the effort show little further change. This is because the counting window has already expanded to the right boundary of the simulation space. Since the height of the counting window is fixed at 0.10, the maximum area it can cover is about one tenth of the entire simulation space. Under the assumption that the marker points are uniformly and randomly distributed, the number of markers recorded within the window will therefore usually not exceed about one tenth of the total number of markers.
+
+We consider a marker threshold of 50 to be the best choice. At this point, $\sigma$ has already decreased substantially, while the effort remains at a moderate level. Although further increasing the threshold can continue to improve precision, it would also substantially increase the data collection effort. Therefore, in the subsequent simulations, this study sets the marker threshold dynamically as 1/20 of the total number of markers. This dynamic setting can adapt to different numbers of added markers and achieves a more reasonable balance between estimation precision and data collection effort.
+
+### Target-to-Marker Ratio
+According to Figure \ref{f:Ratio}, all three statistical measures decrease continuously as the target-to-marker ($u$) ratio decreases. When the number of targets is much greater than the number of markers, both the  coefficient of variation ($CV$) and the total standard error ($\sigma$) exceed 30%, while the standard deviation also remains relatively high. As the $u$ decreases from 50 to 10, all three measures decline substantially, indicating that increasing the number of markers can significantly reduce the random error in the concentration estimate. When the ratio decreases further from 10 to 2, the errors continue to decline, with both $CV$ and $\sigma$ falling to approximately 9%. At an $u=1$ ratio of 1, all three measures reach their minimum values, although the improvement relative to a ratio of 2 is small.
+
+At the same time, we can observe that across all tested ratios, the trends and values of $CV$ and $\sigma$ are very similar, and the two curves almost overlap. The $CV$ reflects the actual dispersion of the concentration estimates obtained from repeated simulations, whereas $\sigma$ is the theoretical error calculated from the counting numbers. Their agreement indicates that the fluctuations in concentration observed in the simulations are broadly consistent with the predictions of the theoretical error formula.
+
+According to Figure \ref{f:Effort}, when the target-to-marker ($u$) ratio decreases from 50 to 20, precision improves substantially, indicating that increasing the number of markers in this range still yields clear gains in precision. When the ratio $u$ reaches 10, however, the improvement in precision begins to diminish as data collection effort continues to increase. By the time the ratio reaches 2, the precision exceeds 90%. If the number of markers is increased further, reducing the ratio to 1, only a very small additional improvement in precision can be achieved. Therefore, although $u = 1$ corresponds to the lowest statistical error, $u = 2$ is a more appropriate choice. In comparison, $u = 2$ already achieves more than 90% estimation precision while avoiding additional data collection effort.
+
+### Evaluation Metrics
+According to Table \ref{table:best results}, under the best parameter combination, we obtain 
+$\hat{c} = 10010.66 \pm 798.44,\ Accuracy = 99.89%$. Meanwhile, the total standard error is 7.74, and the running time is 145.27. With the best parameters, our simulation achieves high accuracy and precision while still maintaining a low data collection effort.
+
+## Multi-type Microfossil Scenario
+### Target1-to-Target2 Ratio
+According to Figure \ref{f:Ratio2}, in general, when the number of the two targets is different, the target with a larger number usually has a lower standard error, which means higher precision. Conversely, a smaller number of targets will have slightly higher standard errors. When $u_x > 1$, the number of target1 is greater than that of target2, so $\sigma_1$ is lower than $\sigma_2$; when $u_x < 1$, target2 has a greater number, so $\sigma_2$ is lower than $\sigma_1$. This result conforms to Equation \ref{eq:sigma}. When the number of target counts is larger, the $1/x$ term becomes smaller, and the final standard error obtained is also lower.
+
+However, even when there is a clear difference in number between the two target types, the difference between their errors is generally less than 5%. Therefore, although the target with the smaller number has slightly lower precision, its error remains within an acceptable range. More importantly, when the numbers of the two targets are similar, that is, when $u_x$ approaches 1, the difference between $\sigma_1$ and $\sigma_2$ gradually decreases. Their errors become nearly identical and both remain at relatively low levels, indicating that the model can accurately estimate the concentrations of both microfossil types simultaneously. The same pattern was also observed in the other two scenarios (Scenario2,3).
+
+Therefore, within a certain range, although differences in the numbers of different microfossil types affect their respective estimation precision, the overall effect is limited. This suggests that, in multi-type microfossil analyses, the same marker count can still provide relatively stable concentration estimates for microfossil types with different numbers. The more similar the numbers of the two microfossil types are, the more consistent their estimation precision becomes, which is more favorable for obtaining stable concentration estimates for both types simultaneously.
+
+### Rare Target
+According to Figure \ref{f:Rare}, as marker-to-traget2 ($u_r$) ratio increases from 1 to 20, the number of target2 becomes increasingly small relative to the number of markers, and its error continuously increases from approximately 10% to more than 30%.
+
+According to Figure \ref{f:Prob}, when $u_r = 25$, the detection probability remains 100%. When the ratio reaches 40, the detection probability begins to decline, indicating that the counting procedure sometimes fails to detect the rare target. At $u_r = 100$, the detection probability is 89.4%, which is slightly below 90%. In other words, when the number of target2 is only about 1% of the number of markers, more than 10% of the simulations fail to record any target2. When the ratio further increases to 200, the detection probability decreases to 66%. As the number of target2 decreases further, the risk of non-detection increases rapidly.
+
+These results indicate that the analysis of rare targets involves two distinct problems. First, even when a rare target is successfully detected, the precision of its concentration estimate is low. Second, as the number of targets decreases further, the counting window may contain none of that target type. Therefore, for extremely rare microfossils, simply increasing the number of markers cannot solve the problem and may even cause the counting window to stop earlier. If rare types are the primary focus of the study, it may be necessary to increase the counting area or impose a minimum count requirement for the rare target.
+
+### Correlation
+According to Figure \ref{f:Cor_cc}, the points are generally distributed along an upward-right trend, with a correlation coefficient is $r = 0.8332$. This indicates a strong positive correlation between the two concentration estimates. When the estimated concentration of target1 is high, the estimated concentration of target2 also tends to be high.
+
+According to Figure \ref{f:Corr}, as target1-to-target2 ($u_x$) ratio gradually approaches 1 from 8, the correlation coefficient increases from 0.671 and reaches its maximum value of 0.824 at $u_x = 1$. When the $u_x = 1/2$, the correlation coefficient remains high at 0.818. Thereafter, as the ratio deviates further from 1, the correlation coefficient decreases again, reaching 0.656 at $u_x = 1/8$. The correlation is strongest when the numbers of the two targets are similar and weaker when the number of one target is substantially smaller than that of the other.
+
+A possible explanation is that when the numbers of the two targets are similar, their counting errors are also similar, and the shared marker denominator affects the two concentration estimates more synchronously. In contrast, when the number of one target is very small, the larger Poisson counting variation associated with that target accounts for a greater proportion of the total error, thereby weakening the correlation induced by the shared denominator. Therefore, when interpreting correlations between different microfossil types, the statistical correlation introduced by the shared marker denominator should be considered to avoid directly attributing it to ecological or environmental relationships.
+
+## Conclusion and Future Work
+This study completed microfossils sampling simulations and parameter optimization based on the Linear Method. The optimal parameter combination was 500 simulation times, marker threshold of 1/20 and target-to-marker ratio of 2. Under this combination, the estimated concentration can maintain high accuracy and precision while maintaining low data collection effort.
+
+Our simulations also proved to be applicable to multi-type microfossil scenarios. Target types with larger numbers generally had lower standard errors and higher estimation precision. When the number of rare targets is less than $1/100$ of the marker number, the rare type not only had lower estimation precision but also faced a higher risk of non-detection. In addition, because the concentration estimates of different targets shared the same marker count, a positive correlation arose between their estimates even when the two target types were generated independently.
+
+For future work, the current study approximated the counting effort by the running time, but this is still different from the actual microscope operation. In the follow-up study, we can further consider the number of scanning fields, the identification time of target and marker particles, and the identification difficulty of different microfossil types. At the same time, the current study mainly considers two targets, and we can extend the model to include more microfossil types of communities to be closer to real sedimentary samples.
+
+# Acknowledgements
+In order to better reproduce our simulation results, we have set up a repository on Github with the following link: https://github.com/jun1953597/MDSresearch_FinalReport_Jun_Y.git
+
+# References
+
+<div id="refs"></div>
+
+\newpage
+
+# Statistical appendix
+
+## Appendix A: Table of Variables
+
+\begin{table}[ht!]
+\centering
+\small
+\begin{tabular}{ |c|c|c| } 
+ \hline
+ Parameter name & Variable name & Description \\ \hline
+ Target intensity & $\lambda_{target}$ & Expected target quantity per unit area \\ \hline
+ Marker intensity & $\lambda_{marker}$ & Expected marker quantity per unit area \\ \hline
+ Marker threshold & marker\_goal & The goal of counting the number of markers \\ \hline
+ Simulation times & nsim & The total number of simulation repetitions \\ \hline
+ Left boundary & left\_x & The x-coordinate of the left boundary of the counting window \\ \hline
+ Initial width & initial\_width & The initial width of the counting window \\ \hline
+ Lower boundary & y\_lower & The y-coordinate of the lower boundary of the counting window \\ \hline
+ Upper boundary & y\_upper & The y-coordinate of the upper boundary of the counting window \\ \hline
+ Step width & step\_width & The distance of each step of the right boundary of the counting window \\ \hline
+ Output file & output\_file & The final output file, such as sim\_result.csv \\ 
+ \hline
+\end{tabular}
+\caption{Table of variables in the code}
+\label{table:Variable}
+\end{table}
+
+## Appendix B: Code And Output
+### Appendix B.1: Simulation process in the SimulationCODE.R file
+```{r B.1, eval = FALSE}
+library(tidyverse)
+set.seed(42)
+output_file <- "sim_result_multi.csv"
+# =========================================================
+# Simulation Window
+xmin <- 0
+xmax <- 1
+ymin <- 0
+ymax <- 1
+
+# Simulate the two-dimensional homogeneous Poisson process point
+simulate_one_type <- function(lambda, type_name,
+                              xmin = 0, xmax = 1,
+                              ymin = 0, ymax = 1) {
+  area <- (xmax - xmin) * (ymax - ymin)
+  n <- lambda # rpois(1, lambda * area)
+  
+  tibble(
+    x = runif(n, xmin, xmax),
+    y = runif(n, ymin, ymax),
+    type = type_name)}
+
+simulate_marked_ppp <- function(lambda_target1, lambda_marker, lambda_target2,
+                                xmin = 0, xmax = 1,
+                                ymin = 0, ymax = 1) {
+  bind_rows(
+    simulate_one_type(lambda_target1, "target1", xmin, xmax, ymin, ymax),
+    simulate_one_type(lambda_marker, "marker", xmin, xmax, ymin, ymax),
+    simulate_one_type(lambda_target2,  "target2",  xmin, xmax, ymin, ymax)
+  ) %>%
+    mutate(id = row_number()) %>%
+    select(id, x, y, type)
+}
+
+# Setting of the Counting Window
+left_x <- 0.10          # Left boundary
+initial_width <- 0.1   # Initial width
+y_lower <- 0.45         # lower boundary
+y_upper <- 0.55         # upper boundary
+step_width <- 0.002      # The width each time it extends to the right
+
+# =========================================================
+# Filter points within the counting window
+filtered_points <- function(data, x_left, x_right, y_lower, y_upper) {
+  data %>%
+    filter(
+      x >= x_left,
+      x <= x_right,
+      y >= y_lower,
+      y <= y_upper)
+}
+
+expand_rectangle <- function(data, x_left, initial_width, y_lower, y_upper,
+                             marker_goal, step_width, xmax) {
+  x_right <- x_left + initial_width
+  
+  repeat {
+    inside <- filtered_points(data, x_left, x_right, y_lower, y_upper)
+    
+    marker_count <- sum(inside$type == "marker")
+    target1_count <- sum(inside$type == "target1")
+    target2_count  <- sum(inside$type == "target2")
+    
+    if (marker_count >= marker_goal || x_right >= xmax) {
+      return(list(
+        x_left = x_left,
+        x_right = x_right,
+        y_lower = y_lower,
+        y_upper = y_upper,
+        width = x_right - x_left,
+        area = (x_right - x_left) * (y_upper - y_lower),
+        marker_count = marker_count,
+        target1_count = target1_count,
+        target2_count = target2_count,
+        total_count = nrow(inside),
+        points_inside = inside
+      ))
+    }
+    
+    x_right <- min(x_right + step_width, xmax)
+  }
+}
+
+# =========================================================
+start_t <- Sys.time() # start time
+# parameter setting
+lambda_target1 <- 10000
+lambda_target2 <- 0
+lambda_marker <- 5000
+lambda_total <- lambda_target1 + lambda_marker + lambda_target2
+marker_goal <- lambda_marker/20
+nsim <- 500 # Number of simulations
+
+simulation_list <- map(seq_len(nsim), function(sim) {
+  data <- simulate_marked_ppp(
+    lambda_target1 = lambda_target1,
+    lambda_marker = lambda_marker,
+    lambda_target2 = lambda_target2,
+    xmin = xmin, xmax = xmax,
+    ymin = ymin, ymax = ymax)
+  
+  count_res <- expand_rectangle(
+    data = data,
+    x_left = left_x,
+    initial_width = initial_width,
+    y_lower = y_lower,
+    y_upper = y_upper,
+    marker_goal = marker_goal,
+    step_width = step_width,
+    xmax = xmax
+  )
+  
+  x1_count <- count_res$target1_count
+  x2_count <- count_res$target2_count
+  n_count <- count_res$marker_count
+  
+  c1_hat <- if (n_count > 0) (x1_count / n_count) * lambda_marker else NA_real_
+  c2_hat <- if (n_count > 0) (x2_count / n_count) * lambda_marker else NA_real_
+  
+  
+  list(
+    sim = sim,
+    data = data,
+    count_summary = tibble(
+      sim = sim,
+      total = lambda_total,
+      target1 = lambda_target1,
+      target2 = lambda_target2,
+      marker = lambda_marker,
+      marker_count = n_count,
+      target1_count = x1_count,
+      target2_count = x2_count,
+      c1_hat = c1_hat,
+      c2_hat = c2_hat)
+  )
+})
+
+simulation_results <- map_dfr(simulation_list, "count_summary")
+print(head(simulation_results))
+
+# =========================================================
+# c_hat_mean
+x1_count_mean <- mean(simulation_results$target1_count)
+x2_count_mean <- mean(simulation_results$target2_count)
+n_count_mean <- mean(simulation_results$marker_count)
+c1_hat_mean <- (x1_count_mean/n_count_mean) * lambda_marker # E(x)/E(n)
+c2_hat_mean <- (x2_count_mean/n_count_mean) * lambda_marker # E(x)/E(n)
+
+# standard deviation
+c1_hat_sd <- sd(simulation_results$c1_hat)
+c2_hat_sd <- sd(simulation_results$c2_hat)
+
+# coefficient of variation
+cv1 <- 100*c1_hat_sd/c1_hat_mean
+cv2 <- 100*c2_hat_sd/c2_hat_mean
+
+# total standard error
+x1_error <- sqrt(x1_count_mean)/x1_count_mean
+x2_error <- sqrt(x2_count_mean)/x2_count_mean
+n_error <- sqrt(n_count_mean)/n_count_mean
+total_se1 <- 100*sqrt(x1_error^2+n_error^2)
+total_se2 <- 100*sqrt(x2_error^2+n_error^2)
+
+# accuracy
+accuracy1 <- 100*(1 - abs(c1_hat_mean - lambda_target1) / lambda_target1)
+accuracy2 <- 100*(1 - abs(c2_hat_mean - lambda_target2) / lambda_target2)
+
+# correlation
+cov <- cov(simulation_results$c1_hat, simulation_results$c2_hat)
+cor <- cor(simulation_results$c1_hat, simulation_results$c2_hat)
+
+# data collection effort
+end_t <- Sys.time() # end time 
+time <- as.numeric(difftime(end_t, start_t, units = "secs")) 
+
+# store one row for this run
+run_summary <- tibble(
+  nsim = nsim,
+  lambda_target1 = lambda_target1,
+  lambda_target2 = lambda_target2,
+  lambda_marker = lambda_marker,
+  lambda_total = lambda_total,
+  marker_goal = marker_goal,
+  
+  
+  c1_hat_mean = c1_hat_mean,
+  c2_hat_mean = c2_hat_mean,
+  
+  c1_hat_sd = c1_hat_sd,
+  c2_hat_sd = c2_hat_sd,
+  
+  cv1 = cv1,
+  total_standard_error1 = total_se1,
+  cv2 = cv2,
+  total_standard_error2 = total_se2,
+  
+  accuracy1 = accuracy1,
+  accuracy2 = accuracy2,
+  
+  cov = cov,
+  cor = cor,
+  
+  runtime_seconds = time
+)
+cat(sum(simulation_results$target2_count > 0))
+
+# append to CSV
+write_csv(run_summary, output_file, append = TRUE)
+```
+
+### Appendix B.2: Calculations in the bestResult.R file
+```{r B.2, eval = FALSE}
+# c_hat_mean
+x1_count_mean <- mean(simulation_results$target1_count)
+n_count_mean <- mean(simulation_results$marker_count)
+c1_hat_mean <- (x1_count_mean/n_count_mean) * lambda_marker # E(x)/E(n)
+cat('The estimated concentration is:', c1_hat_mean, '\n')
+
+# standard deviation
+c1_hat_sd <- sd(simulation_results$c1_hat)
+cat('The standard deviation is:', c1_hat_sd, '\n')
+
+# coefficient of variation
+cv1 <- 100*c1_hat_sd/c1_hat_mean
+cat('The coefficient of variation(%) is:', cv1, '\n')
+
+# total standard error
+x1_error <- sqrt(x1_count_mean)/x1_count_mean
+n_error <- sqrt(n_count_mean)/n_count_mean
+total_se1 <- 100*sqrt(x1_error^2+n_error^2)
+cat('The total standard error(%) is:', total_se1, '\n')
+
+# accuracy
+accuracy1 <- 100*(1 - abs(c1_hat_mean - lambda_target1) / lambda_target1)
+cat('The accuracy(%) is:', accuracy1, '\n')
+
+# data collection effort
+time <- as.numeric(difftime(end_t, start_t, units = "secs")) 
+cat('The data collection effort is:', time, '\n')
+```
+The estimated concentration is: 10010.66 
+
+The standard deviation is: 798.4373 
+
+The coefficient of variation(%) is: 7.97587 
+
+The total standard error(%) is: 7.737415 
+
+The accuracy(%) is: 99.8934 
+
+The data collection effort is: 145.2688
+
+### Appendix B.3: Plotting in the distance.R file
+```{r B.3, eval = FALSE}
+# =========================================================
+# Nearest Neighbor Distance
+nn_all <- map_dfr(simulation_list, function(obj) {
+  fossil_dat <- subset_type(obj$data, fossil_type_for_distance)
+  
+  nearest_neighbour_distances(fossil_dat) %>%
+    transmute(sim = obj$sim, nn_distance = nn_distance)
+})
+
+if (nrow(nn_all) > 0) {
+  p_nn_all_hist <- ggplot(nn_all, aes(x = nn_distance)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 40) +
+    stat_function(
+      fun = function(x) g_nn_theory(x, lambda_distance),
+      linewidth = 1) +
+    theme_minimal() +
+    labs(
+      title = paste("Density Histogram of the Nearest Neighbor Distance"),
+      x = "distance", y = "density") + 
+    theme(plot.title = element_text(hjust = 0.5))
+  
+  print(p_nn_all_hist)}
+
+# =========================================================
+# Inter-event distances
+pair_all <- map_dfr(simulation_list, function(obj) {
+  fossil_dat <- subset_type(obj$data, fossil_type_for_distance)
+  
+  inter_event_distances(fossil_dat) %>%
+    transmute(sim = obj$sim, distance = distance)
+})
+
+if (nrow(pair_all) > 0) {
+  p_pair_all_hist <- ggplot(pair_all, aes(x = distance)) +
+    geom_histogram(bins = 50) +
+    theme_minimal() +
+    labs(
+      title = paste("Frequency histogram of Inter-event Distances"),
+      x = "distance", y = "count") +
+    theme(plot.title = element_text(hjust = 0.5))
+  
+  print(p_pair_all_hist)}
+```
+
+### Appendix B.4: Plotting in the SimExample.R file
+```{r B.4, eval = FALSE}
+# =========================================================
+p_demo <- ggplot(one_sim, aes(x = x, y = y, color = type)) +
+  geom_point(size = 2, alpha = 0.85) +
+  geom_rect(
+    data = rect_df,
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+    inherit.aes = FALSE,
+    fill = NA,
+    color = "black",
+    linewidth = 1) +
+  coord_equal(xlim = c(xmin, xmax), ylim = c(ymin, ymax)) +
+  theme_minimal() +
+  labs(
+    title = "Example diagram of simulation",
+    subtitle = bquote(
+      marker == .(one_count$marker_count) * "," ~
+        target == .(one_count$target_count) * "," ~
+        hat(c) == .(round(one_c_hat, 2))),
+    x = "x",
+    y = "y",
+    color = "type") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5))
+
+print(p_demo)
+
+# =========================================================
+p_demo2 <- ggplot(one_sim2, aes(x = x, y = y, color = type)) +
+  geom_point(size = 2, alpha = 0.85) +
+  geom_rect(
+    data = rect_df2,
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+    inherit.aes = FALSE,
+    fill = NA,
+    color = "black",
+    linewidth = 1
+  ) +
+  coord_equal(xlim = c(xmin, xmax), ylim = c(ymin, ymax)) +
+  theme_minimal() +
+  labs(
+    title = "Example diagram of simulation in multiple target scenarios",
+    subtitle = bquote(
+      marker == .(one_count2$marker_count) * "," ~
+        target1 == .(one_count2$target1_count) * "," ~
+        target2 == .(one_count2$target2_count)),
+    x = "x",
+    y = "y",
+    color = "type") +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5))
+
+print(p_demo2)
+```
+
+### Appendix B.5: Plotting in the SimPlot.R file
+```{r B.5, eval = FALSE}
+# =========================================================
+cor_c <- ggplot(cor_results,aes(x = c1_hat, y = c2_hat)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Correlation between concentration estimates",
+       subtitle = bquote(Correlation == 0.8332),
+       x = expression(hat(c)[1]),
+       y = expression(hat(c)[2])) +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(size = 14, hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5))
+
+# =========================================================
+cumc_plot <- ggplot(cumc_results, aes(x = sim, y = cum_c_hat)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_hline(
+    yintercept = 1000,
+    linetype = "dashed",
+    color = "red"
+  ) +
+  labs(
+    title = "Convergence of cumulative concentration estimate",
+    x = "Simulation times",
+    y = expression(bar(c))
+  ) +
+  theme_minimal()
+
+# =========================================================
+ratio <- ggplot(df_ratio, aes(x = `x:n ratio`)) +
+  # cov curve
+  geom_line(aes(y = cov, color = "CV", group = 1),linewidth = 1.2) +
+  geom_point(aes(y = cov,color = "CV"),size = 3) +
+  # total_standard_error curve
+  geom_line(aes(y = total_standard_error,color = "sigma",group = 1),
+            linewidth = 1.2,linetype = "dashed") +
+  geom_point(aes(y = total_standard_error,color = "sigma"), size = 3) +
+  
+  # c_hat_sd 
+  geom_col(aes(y = c_hat_sd * scale_factor,fill = "sd"),alpha = 0.4,width = 0.6) +
+  # axis
+  scale_y_continuous(name = "CV, sigma",sec.axis = sec_axis(~ . / scale_factor, name = "sd")) +
+  scale_color_manual(values = c("CV" = "#D55E00","sigma" = "#0072B2")) +
+  scale_fill_manual(values = c("sd" = "grey60" ) ) +
+  
+  labs(title = "The variation of statistics under different ratios u",
+       x = "target-to-marker (u) ratio") +
+  
+  theme_minimal() +
+  theme(
+    axis.title.y.left = element_text(color = "black"),
+    axis.title.y.right = element_text(color = "black"),
+    legend.title = element_blank(),
+    legend.position = "top")
+
+# =========================================================
+runtime <- ggplot() +
+  geom_point(data = df_runtime,
+             aes(x = runtime_seconds, y = precision),
+             size = 3, color = "#D55E00") +
+  geom_line(data = smooth_df,
+            aes(x = runtime_seconds, y = precision),
+            linewidth = 1.2, color = "#0072B2") +
+  geom_text(data = df_runtime,
+            aes(x = runtime_seconds, y = precision, label =`x:n ratio`),
+            vjust = -1,size = 4) +
+  labs(
+    title = "The relationship between Data collection effort and Precision",
+    x = "data collection effort",
+    y = "precision") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.margin = margin(r = 20, l = 20))
+
+# =========================================================
+threshold_m <- ggplot(df_marker, aes(x = marker_goal)) +
+  geom_line(aes(y = cov, color = "sigma", group = 1), linewidth = 1) +
+  geom_point(aes(y = cov, color = "sigma"), size = 2) +
+  
+  geom_line(aes(y = runtime_seconds * scale_factor_marker, color = "effort", group = 1), linewidth = 1) +
+  geom_point(aes(y = runtime_seconds * scale_factor_marker, color = "effort"), size = 2) +
+  
+  scale_y_continuous(name = "sigma",sec.axis = sec_axis(~ . / scale_factor_marker, name = "effort")) +
+  scale_color_manual( values = c("sigma" = "#D55E00","effort" = "#0072B2")) +
+  
+  labs(x = "marker_threshold",title = "The influence of the marker threshold on the results") +
+  theme_minimal(base_size = 14)+
+  theme(legend.title = element_blank(),
+        legend.position = "top")
+
+# =========================================================
+corr <- ggplot(df_cor, aes(x = x1.x2, y = cor, group = 1)) +
+  geom_line(linewidth = 1.1, color = "#0072B2") +
+  geom_point(size = 3.2, color = "#0072B2") +
+  geom_text(
+    aes(label = sprintf("%.3f", cor)),vjust = -0.8,size = 4) +
+  scale_y_continuous(
+    limits = c(0.6, 0.9),
+    breaks = seq(0.6, 0.9, by = 0.05),
+    expand = expansion(mult = c(0.02, 0.08))) +
+  labs(x = expression("target1-to-target2 (" * u[x] * ") ratio "),y = "Correlation",
+    title = expression("Correlation under different ratios " * u[x])) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(size = 15, hjust = 0.5, face = "bold"),
+    axis.title.x = element_text(size = 13, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 13, margin = margin(r = 10)),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(10, 15, 10, 15))
+
+# =========================================================
+cv <- ggplot(df_cor_long, aes(x = x1.x2, y = se, fill = se_type)) +
+  geom_col(
+    position = position_dodge(width = 0.75),
+    width = 0.65, alpha = 0.8) +
+  coord_cartesian(ylim = c(14.5, 20.5)) +
+  scale_y_continuous(
+    breaks = seq(14, 20, by = 1)) +
+  labs(x = expression("target1-to-target2 (" * u[x] * ") ratio"), y = expression(sigma),
+       title = expression("The variation of " * sigma ~" under different ratios " * u[x] )) +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "top",
+    axis.title.x = element_text(size = 13),
+    axis.title.y = element_text(size = 13),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    plot.title = element_text(size = 16, hjust = 0.5))
+
+# =========================================================
+ggplot(df_rare1, aes(x = x1.x2, y = total_standard_error2)) +
+  geom_line(color = "#2C7FB8",linewidth = 1.1,group = 1) +
+  geom_point(color = "#2C7FB8",size = 3) +
+  labs(
+    x = expression("marker-to-target2 (" * u[r] * ") ratio"),
+    y = expression(sigma ~ "of rare target"),
+    title = "Variation in SE of rare target",
+    subtitle = expression("ratio " * u[r]* " from 1 to 20")) +
+  theme_classic(base_size = 13) +
+  theme(
+    plot.title = element_text( size = 15, hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.text = element_text(color = "black"),
+    axis.line = element_line(linewidth = 0.6),
+    axis.ticks = element_line(linewidth = 0.6))
+
+# =========================================================
+ggplot(df_rare2, aes(x = x1.x2, y = detection_probability, group = 1)) +
+  geom_line(color = "#D95F0E",linewidth = 1.1) +
+  geom_point(color = "#D95F0E",size = 3) +
+  geom_hline(
+    yintercept = df_rare2$detection_probability[as.character(df_rare2$x1.x2) == "100"],
+    linetype = "dashed",
+    color = "red") +
+  geom_text(
+    data = df_rare2[df_rare2$x1.x2 == 100, ],
+    aes(label = paste0(round(detection_probability * 100, 1), "%")),vjust = -1,color = "black",size = 4) +
+  scale_y_continuous(limits = c(0.6, 1),breaks = seq(0.6, 1, by = 0.1),labels = scales::percent_format(accuracy = 1)) +
+  labs(
+    x = expression("marker-to-target2 (" * u[r] * ") ratio "),
+    y = "Detection probability",
+    title = "Detection probability of rare target",
+    subtitle = expression("ratio " * u[r]* " from 25 to 200")) +
+  theme_classic(base_size = 13) +
+  theme(
+    plot.title = element_text( size = 15, hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.text = element_text(color = "black"),
+    axis.line = element_line(linewidth = 0.6),
+    axis.ticks = element_line(linewidth = 0.6))
+```

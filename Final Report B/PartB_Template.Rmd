@@ -1,0 +1,266 @@
+---
+title: "Your title"
+subtitle: "Part B template"
+author: "Your name"
+date: "2026-03-18"
+output:
+  pdf_document:
+      number_sections: true
+bibliography: TestBibFile.bib
+geometry: "top=20mm, left=20mm, right=20mm, bottom=20mm"
+fontsize: 12pt
+---
+
+\newtheorem{theorem}{Theorem}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Project supervisor: 
+
+# Declaration
+
+In submitting this work I am indicating that I have read the University's Academic Integrity Policy. I declare that all material in this assessment is my own work except where there is clear acknowledgement and reference to the work of others. I give permission for this work to be reproduced and submitted to other academic staff for educational purposes.
+
+# Abstract
+
+An abstract goes here, which should be the final thing you write. It should be one or two paragraphs, summarising the key background and results of what is written in the main part of the report. It should be concise, but clear. If it is too long, it dilutes the important features, too short and it has no information. So it's a balancing act. What are the most important things someone reading your report should know about the task and the results? For an academic paper, the Abstract is how someone decides to bother reading the rest of the article.
+
+In an industry report it might often be called an "executive summary", but in this case, it's even more crucial because it is often the only part your boss or client will actually read! They don't want to wade through hundreds of pages of technical muck to get the message (they do want the muck --- it is needed to support the results --- but they might not examine it in detail).
+
+
+\newpage
+
+# Introduction
+
+Write this after you have written the rest of report (except the Abstract). It should give a clear, concise introduction to the topic and why the reader should care about it. Important facets of an introduction are:
+
+- introduce the basic ideas to be presented (at a high level);
+
+- strongly motivate the work;
+
+- describe what you will do and present; and
+
+- give a summary of key results (but don't go into too much detail here).
+
+You may notice it sounds a little like the abstract, and it is. However, now you have space and time to go into more detail (though it is still somewhat abstracted from the full detail).
+
+The Introduction should not be too technical and diagrams are a good way to help your explanation.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{WikiTRex.png}
+\caption{T-Rex picture. Source Wikipedia: \scriptsize \url{https://commons.wikimedia.org/wiki/File:Tyrannosaurus_Rex_colored.png}}
+\label{f:TRex}
+\end{figure}
+
+For example, you can see in Figure \ref{f:TRex} that we have a picture of a Tyrannosaurus Rex (for some reason).
+
+# Background
+
+Here you describe, in detail, the background of the project. This includes a comprehensive literature review of the work that has led up to your project. It should highlight any problems or omissions in the literature to justify your project. Remember that to cite a reference you use `[@<reference name>, <page range>]`, eg. [@KnuthTextbook, p.17] or [@lesk1977, p.33--35]. You can also specify equation numbers in your references if you like, eg. [@lesk1977, Eqn. 4].
+
+In the Background section you also need to define any technical terms, as well as give the important equations that are needed.
+
+By the end of the Background section the reader should understand where this project fits in the broader scientific discipline, what the questions are and what most of the jargon means.
+
+# Methods (or possibly a more informative heading)
+
+Methods that are simple background material should go in the previous section. This section focuses on those that are novel, or in some cases just more difficult or more important for the work. Sometimes the section will be called "methods", but I find a more specific, and descriptive heading is usually preferable. Your focus in describing the methods used should be reproducibility: the reader should be able to recreate your work from your description. Describe data, experiments, simulations, or solution techniques so that your reader can understand exactly what you did. It may be helpful to keep trying to answer the 6Ws: Why, When, Where, What, Who and How.
+
+However, the art of such writing is to balance detail and precision with brevity. You should try to make your report somewhat self-contained, so that the reader can understand what is happening without needing to do significant background reading. But if explaining the details of some concept will take too much space, and/or take you too far from the main point of what you are saying, then you may just want to cite a reference where the details are contained. But you should still explain what is in the reference and how it relates to what you need.  
+
+Mathematical notation is essential in composing precise, yet concise descriptions of a problem. However, do not use mathematics or jargon for its own sake. Clarity is important, and mathematics or complicated technical terms can either enhance this (when used appropriately) or detract from it (if used carelessly). Your goal is not to try to seem smart by using complicated words. Your goal is to communicate!
+
+At the end of the Methods section, ask yourself:
+
+\begin{center}
+"Does the reader have all the information they need (from the Background and Methods sections) so that they can reproduce my results exactly?"
+\end{center}
+
+If you can answer this in the affirmative, then you are probably on the right track.
+
+## Some useful environments
+
+By using a "greater than" character `> ` we can create a new environment separate from the main part of the text. This can be really useful for writing some things that you want to make really clear, like definitions or maybe some theorems from earlier sources.
+
+**Definitions**
+
+> Here we will define the notation that we will be using:
+
+> - This will be a dot point in the new environment
+
+> - This puts another dot point.
+
+> - $a$ is the number of red beans in the sample
+
+> - $b$ is the number of blue beans in the sample
+
+> We can type equations in our new environment:
+\begin{align}
+\label{eqn:EX} E[\frac{1}{X}] \neq \frac{1}{E[X]}
+\end{align}
+
+> You can see that the text is indented and so it is clearly separated from the normal text because the next line is just normal text.
+
+Here is the normal text outside our Definition environment. Now, how about a theorem?
+
+**Theorem [@KnuthTextbook, p.22]**
+
+> This is a theorem that we need. It comes from the earlier work cited in the title of this environment, and we include it here so that the reader has all the information that they need to see what we are doing. As we did above, you can have dot points in your new environment.
+
+> 1. first result in the theorem
+
+> 2. second result in the theorem
+
+> Now an equation in the theorem
+\begin{align}
+\label{eqn:ab} b &= a+2\\
+&=76
+\end{align}
+
+This text is after the theorem.
+
+## Algorithms
+
+You will very likely want to describe some algorithms or processes that you followed in your project. For that, you could use the same structure as above.
+
+**Model algorithm**
+
+> - Step 1: Define the initial values of the parameters $n, a, c_1, its$ (see lines 2--9 of `sims.R`)
+
+> - Step 2: Generate all the random points that we will sample from.
+
+> - Step 3: Sample $n$ points from the population.
+>   + Repeat this $its$ times.
+
+## Something fancy
+
+If you want to really separate something from the main text, you could try putting a box around it with the following code.
+
+::: {.framed data-latex=""}
+
+**Theorem [@KnuthTextbook, p.22]**
+
+This is the same theorem as above, but now in a facny box!
+:::
+
+
+
+
+## Maths equations
+
+You can see above that we've got a couple of equations, which were defined using `\begin{align}<maths>\end{align}`. Note that we also included a label with `\label{<name>}`. This is handy, since it allows us to refer to the equation in our text, eg. from Equation \eqref{eqn:ab} we can see that $b$ is two more than $a$.
+
+# Results
+
+Remember the advice about the previous sections. You need your results to be concise, but once again be concrete, quantitative, and provide enough information that the results could be reproduced and verified. Figures and tables can be very useful. However, while a picture is worth a thousand words, this is not true by itself. Any graph or figure included in a report MUST have:
+
+1. a detailed caption describing exactly what the figure shows (it should almost stand alone);
+2. appropriate axes with labels including units; and
+3. discussion in the text of the document, not just the caption (make sure you refer to exact figure numbers in the text).
+
+Moreover, they should be easy to read with large enough text, and clearly marked data points. Tables are also good and should follow the same rules. To produce a table, you can perhaps print out a tibble using an R code chunk, or you can type the table using Latex commands like the one in Table \ref{table:1}.
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{ |c|c|c| } 
+ \hline
+ cell1 & cell2 & cell3 \\ \hline
+ cell4 & cell5 & cell6 \\ \hline
+ cell7 & cell8 & cell9 \\ 
+ \hline
+\end{tabular}
+\caption{Table to test captions and labels.}
+\label{table:1}
+\end{table}
+
+A few figures and tables in a document are very useful, but be aware that deluging a reader with figures and tables can be counter-productive. Part of the art of technical writing is choosing good ways of informing the reader of the critical information without diluting it with volumes of irrelevancies.
+
+**IMPORTANT:**
+
+- **All of your results must be backed up by some code output.**
+  + **Any claims that have no supporting evidence will be ignored!**
+
+- So that means that any claims you make should reference the place in the appendix or some code where you produce the calculations or graphs that you use. You can use a footnote for this or just put a comment in brackets.
+  + Here's how you can insert a footnote^[Including a footnote].
+
+- Eg. Likewise, the sons of Feanor, Celegorm and Curufin, dwelt in Nargothrond, and their oath to regain the Silmarils would likewise call them. According to our simulation, on average there was space for all these human and elven heroes 97\% of the time.^[See "percentage of times waiting room exceeded" in Appendix D.4. This calculation was generated by the function `room_prob()` on lines 154 -- 165 of the file `silmarils.R`. This function processes the data output from the `elvish_wait()` function on lines 13  -- 22 of the same file.]
+
+- Eg. He pursued the Orcs and came in secret to their fire, witnessing their cptain holding aloft his father's hand as a trophy, bearing the ring of Felagund. Beren slew the captain and took the hand with the ring, managing to escape before the Orcs could kill him. We also found that the average waiting time experienced by Beren was 5.78 seconds. (See "average waiting time" in Appendix E.2. This calculation was generated by the function `wait_beren()` on lines 57 -- 73 of the file `silmarils_fns.R`.)
+
+# Discussion
+
+Here you discuss the implications of your results in the context of your research project. In other words, tell the reader what you think the results mean. This section will probably involve a bit of a short summary, as you need to remind the reader of what you are doing so that the results are meaningful.
+
+Since research is never finished, you should discuss what the next steps in the project should be.
+
+# Acknowledgements
+
+This is where should acknowledge any help you got, other than those things listed in the references. So things like:
+
+- Research advice given to you by someone else
+- Help provided by an AI agent
+  + Some AI help is ok, as long as it doesn't do your work for you and you acknowledge and reference it
+  + Ask your supervisor for advice on what AI help is appropriate
+- Help given by the Student Advisors
+
+For example, I acknowledge that some of this template was adapted from an old University of Adelaide Latex report template.
+
+# References
+
+<div id="refs"></div>
+
+\newpage
+
+# Statistical appendix
+
+This section should contain all the code and output that you need to justify the claims you made above. Only include the code that actually contributes to your Results or Methods sections (maybe also the Background section). We don't need to see every single line of code you wrote, just the important bits that are needed for the reader to be able to obtain your results. Again, this is another balancing act between being too long and irrelevant, or being too short and incomplete (which would open you up to claims of academic misconduct or negligence). Research is a tough business.
+
+Also, don't just paste all the code in here. Use subheadings and text to say what the code is, and what it is used for.
+
+## Appendix A: First Appendix
+
+This text is under a subheading.
+
+A code chunk running R:
+
+```{r}
+a <- 1
+b <- a+2
+b
+```
+
+You can run python from an Rmd file. But make sure you have the `reticulate` package installed first. Then the following code will run:
+
+```{python}
+import numpy
+x = numpy.arange(0.0, 2.0, 0.5)
+y = 1 + numpy.sin(numpy.pi*x)
+y
+```
+
+The following code chunk doesn't actually run, it is just displaying the code. You can use this if you want to include some code which takes too many hours to actually compile. But then you need to say which file you actually used to generate the data (since this code is not actually doing anything).
+
+```{r, eval = FALSE}
+a <- 1
+b <- a+2
+b
+```
+
+### Appendix A.1: A subsubsection of Appendix A
+
+This text is under a subsubheading.
+
+## Appendix B: The second Appendix
+
+We've now started another Appendix.
+
+### Appendix B.1: A subsection of Appendix B
+
+This text is under a subsubheading.
+
+### Appendix B.2: Another subsection of Appendix B
+
+This text is under a subsubheading.
