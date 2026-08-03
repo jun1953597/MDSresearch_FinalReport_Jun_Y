@@ -35,7 +35,7 @@ Microfossils are the fossils of tiny organisms that need to be observed with a m
 
 Because the number of microfossils is usually very large, researchers usually cannot count the whole sample completely. Therefore, the concentration estimation usually relies on sampling count and statistical inference. Even so, manual counting of microfossils under a microscope is time-consuming and labor-intensive. We often need to balance the estimation precision with the counting effort. Computer simulations can preset the true concentration and particle distribution and be repeated in large numbers under different conditions, allowing a faster assessment of the accuracy and precision of concentration estimates.
 
-This study uses computer simulations to investigate the statistical performance of the Linear Method in microfossil sampling. The accuracy and precision of concentration estimates, together with data collection effort, are used as the main evaluation metrics. The study examines how changes in parameters such as the simulation times, the marker threshold, and the target-to-marker ratio affect the simulation results. To better represent the complex conditions in real samples, where multiple microfossil types exist simultaneously, the study is extended to a multi-type microfossil scenario. It further examines the effects of of different numerical relationships between targets, the detection of rare targets, and the correlation between the concentration estimates of multiple targets.
+This study uses computer simulations to investigate the statistical performance of the Linear Method in microfossil sampling. The accuracy and precision of concentration estimates, together with data collection effort, are used as the main evaluation metrics. The study examines how changes in parameters such as the simulation times, the marker threshold, and the target-to-marker ratio affect the simulation results. To better represent the complex conditions in real samples, where multiple microfossil types exist simultaneously, the study is extended to a multi-type microfossil scenario. It further examines the effects of different numerical relationships between targets, the detection of rare targets, and the correlation between the concentration estimates of multiple targets.
 
 # Background
 ## Exotic Marker Technique
@@ -101,7 +101,7 @@ G(y)=1-\exp(-\lambda \pi y^2)
 
 ## Statistics Estimates
 ### Concentration
-After obtaining the counts of target microfossils and marker particles using the Exotic Marker Technique and the Linear Method, we can estimate the target concentration. The closer the estimated value is to the true value, the higher the accuracy. The general formula is based from @Benninghoff1962:
+After obtaining the counts of target microfossils and marker particles using the Exotic Marker Technique and the Linear Method, we can estimate the target concentration. The closer the estimated value is to the true value, the higher the accuracy. The general formula is based on @Benninghoff1962:
 
 \begin{equation}
 \hat{c} = \frac{x \times N}{n \times V}
@@ -125,7 +125,7 @@ We can then calculate the standard deviation ($sd$) of the concentration estimat
 \end{equation}
 
 ### Precision
-We also need to assess the precision of the estimated concentration. In general, a smaller total standard error indicates higher precision. Here,$\sigma$ represents the total standard error (in %) of the concentration estimate. The formula is based from @Stockmarr1971:
+We also need to assess the precision of the estimated concentration. In general, a smaller total standard error indicates higher precision. Here,$\sigma$ represents the total standard error (in %) of the concentration estimate. The formula is based on @Stockmarr1971:
 
 \begin{equation}
 \sigma = 100 \sqrt{\left(\frac{\sqrt{x}}{x}\right)^2
@@ -148,7 +148,7 @@ We can also get the coefficient of variation according to the Equation \ref{eq:c
 
 The $CV$ reflects the actual dispersion of the concentration estimates obtained from repeated simulations, whereas $\sigma$ is the theoretical error calculated from the counting numbers. The total standard error should therefore approximate the coefficient of variation of the estimated concentrations. By comparing these two measures, we can assess whether our simulations are consistent with the theoretical error.
 
-### Correlaton
+### Correlation
 @Maher1981 [p. 153] noted that the exotic marker technique may generate a positive correlation between the estimated concentrations of separate taxa. In the multi-type microfossil scenario, we also examine the correlation between the estimated concentrations of different targets. The linear relationship between two variables can be measured using the Pearson correlation coefficient:
 
 \begin{equation}
@@ -237,7 +237,7 @@ $$
 \bar{n}_k = \frac{\sum_{i=1}^{k} n_i}{k}.
 $$
 
-Then we substitute $\bar{x}_k$ and $\bar{n}_k$ into Equation 1 to calculate the cumulative concentration estimate $\bar{c}_k$ for the first $k$ simulations. Here, $\lambda_{\mathrm{marker}}$ represents the marker intensity in simulation space.
+Then we substitute $\bar{x}_k$ and $\bar{n}_k$ into Equation \ref{eq:c} to calculate the cumulative concentration estimate $\bar{c}_k$ for the first $k$ simulations. Here, $\lambda_{\mathrm{marker}}$ represents the marker intensity in simulation space.
 
 $$
 \bar{c}_k =
@@ -307,7 +307,7 @@ At the same time, adding more markers means that more marker particles will be o
 \end{table}
 
 ### Evaluation Metrics
-After the above parameter optimization, we will use the best parameter combination, conduct a complete simulation, and show the evaluation matrix of the simulation results. The evaluation matrix includes the estimated concentration, standard deviation, coefficient of variation, total standard error, accuracy, and running time. The best parameter settings are shown in Table \ref{table:best parameter}.
+After the above parameter optimization, we will use the best parameter combination, conduct a complete simulation, and show the evaluation metrics of the simulation results. The evaluation matrix includes the estimated concentration, standard deviation, coefficient of variation, total standard error, accuracy, and running time. The best parameter settings are shown in Table \ref{table:best parameter}.
 
 \begin{table}[ht!]
 \centering
@@ -326,7 +326,7 @@ After the above parameter optimization, we will use the best parameter combinati
 \begin{figure}
 \centering
 \includegraphics[width=0.8\textwidth]{picture/Example2.png}
-\caption{Schematic diagram of simulation in two target scenarios}
+\caption{Schematic diagram of simulation with two target types}
 \label{f:Example2}
 \end{figure}
 
